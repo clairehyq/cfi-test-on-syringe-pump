@@ -401,26 +401,57 @@ String decToString(float decNumber){
 }
 */
 
+void ft_ultimate_div_mod(int *a, int *b)
+    {
+        int *tmp;
+
+        if (b != 0)
+        {
+            *tmp = *a % *b;
+            *a = *a / *b;
+            *b = *tmp;
+        } 
+}
+
+void fun(int a)
+{
+	int cc = 0;
+	char string_[] = "Hello";
+    printf("Value of a is %d\n", a);
+}
+
 //C-FLAT new code
 int main(int argc, char **args) {
-	printf("Starting syringe pump\n");
-	setup();
-	int time = 0;
-	int avg_time = 0;
-	for(int i = 0; i < 11; i++){
-		int count = 1;
-		while(count < 62) {
-			count += 10;
-			time += loop(count);
-		}
-		if(i >= 1){
-			avg_time += time;
-		}
-		time = 0;
-	}
+	// printf("Starting syringe pump\n");
+	// setup();
+	// int time = 0;
+	// int avg_time = 0;
+	// for(int i = 0; i < 11; i++){
+	// 	int count = 1;
+	// 	while(count < 62) {
+	// 		count += 10;
+	// 		time += loop(count);
+	// 	}
+	// 	if(i >= 1){
+	// 		avg_time += time;
+	// 	}
+	// 	time = 0;
+	// }
 
-	avg_time /= 10;
-	printf("avg time is: %d\n", avg_time);
+	// avg_time /= 10;
+	// printf("avg time is: %d\n", avg_time);
+
+	void (*fun_ptr)(int) = &fun;
+	unsigned long start, end;
+
+	start = usecs();
+
+	for(int index = 0; index < 10000; index++){
+		(*fun_ptr)(index);
+	}
+	end = usecs();
+
+	printf("Time is %lu\n", end - start);
 
 	return 0;
 }
