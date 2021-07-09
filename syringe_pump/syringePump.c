@@ -11,7 +11,9 @@
 // Send a number, e.g. "100", to set bolus size.
 // Send a "+" to push that size bolus.
 // Send a "-" to pull that size bolus.
-
+#define _GNU_SOURCE
+#include <sched.h>
+#include <unistd.h> /* sysconf */
 #include "lib/LiquidCrystal.h"
 #include "lib/util.h"
 #include "lib/led.h"
@@ -101,7 +103,7 @@ void setup(){
 	lcd_begin(&lcd, 16, 2);
 	lcd_clear(&lcd);
 
-	lcd_print(&lcd, "SyringePump v2.0", 16);
+	// lcd_print(&lcd, "SyringePump v2.0", 16);
 
 	/* Triggering setup */
 	pinMode(triggerPin, INPUT);
@@ -156,7 +158,7 @@ int loop(int count){
 
 	end = usecs();
 
-	printf("mLBolus = %f, time usecs: %lu\n", mLBolus, end - start);
+	// printf("mLBolus = %f, time usecs: %lu\n", mLBolus, end - start);
 	return (end - start);
 }
 
@@ -364,10 +366,10 @@ void updateScreen(){
 	lcd_clear(&lcd);
 
 	lcd_setCursor(&lcd, 0, 0);  //line=1, x=0
-	lcd_print(&lcd, s1, s1Len);
+	// lcd_print(&lcd, s1, s1Len);
 
 	lcd_setCursor(&lcd, 0, 1);  //line=2, x=0
-	lcd_print(&lcd, s2, s2Len);
+	// lcd_print(&lcd, s2, s2Len);
 }
 
 
@@ -413,45 +415,72 @@ void ft_ultimate_div_mod(int *a, int *b)
         } 
 }
 
+long long int global_mul = 1;
+
 void fun(int a)
 {
 	int cc = 0;
 	char string_[] = "Hello";
-    printf("Value of a is %d\n", a);
+	for(int i = 0; i < 100; i++){
+		global_mul *= 2;
+	}
+    // printf("Value of a is %d\n", a);
+
 }
 
 //C-FLAT new code
 int main(int argc, char **args) {
+	// Bound CPU4 to program execution
+	cpu_set_t mask;
+    unsigned long bitmask = 0;
+    
+    CPU_ZERO(&mask);
+    
+    CPU_SET(3, &mask); /* add CPU4 to cpu set */
+
+    /* Set the CPU affinity for a pid */
+    if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1) 
+    {   
+        perror("sched_setaffinity");
+    }
+
 	// printf("Starting syringe pump\n");
-	// setup();
-	// int time = 0;
-	// int avg_time = 0;
-	// for(int i = 0; i < 11; i++){
-	// 	int count = 1;
-	// 	while(count < 62) {
-	// 		count += 10;
-	// 		time += loop(count);
-	// 	}
-	// 	if(i >= 1){
-	// 		avg_time += time;
-	// 	}
-	// 	time = 0;
-	// }
-
-	// avg_time /= 10;
-	// printf("avg time is: %d\n", avg_time);
-
-	void (*fun_ptr)(int) = &fun;
-	unsigned long start, end;
-
-	start = usecs();
-
-	for(int index = 0; index < 10000; index++){
-		(*fun_ptr)(index);
+	setup();
+	int time = 0;
+	int avg_time = 0;
+	for(int i = 0; i < 101; i++){
+		int count = 1;
+		while(count < 12) {
+			count += 10;
+			time += loop(10);
+		}
+		if(i >= 1){
+			avg_time += time;
+		}
+		time = 0;
 	}
-	end = usecs();
 
-	printf("Time is %lu\n", end - start);
+	avg_time /= 10;
+	// printf("avg time is: %d microsecs\n", avg_time);
+	printf("%d\n", avg_time);
 
+	/* Test program for function pointers: */
+	// void (*fun_ptr)(int) = &fun;
+	// unsigned long start, end;
+
+	// start = usecs();
+
+	// for(int index = 0; index < 1000000; index++){
+	// 	(*fun_ptr)(index);
+	// 	(*fun_ptr)(index);
+	// 	(*fun_ptr)(index);
+	// 	(*fun_ptr)(index);
+	// 	(*fun_ptr)(index);	
+	// }
+	// end = usecs();
+
+	// printf("Time is %lu\n", end - start);
+	
+	CPU_ZERO(&mask);
 	return 0;
 }

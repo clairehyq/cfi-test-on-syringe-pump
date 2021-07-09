@@ -12,10 +12,16 @@
 
 
 CC = clang
-CFIFLAGS = -fsanitize=cfi -flto -fvisibility=hidden -fno-sanitize-trap=all 
+CXX = clang++
+CFIFLAGS = -flto -fvisibility=hidden -fno-sanitize-trap=all 
+CXXFALGS = -Weverything -Werror -pedantic -Wno-c++98-compat -Wno-weak-vtables \
+	-std=c++11 -O0 -fvisibility=hidden -flto -fno-sanitize-trap=all 
 OBJ = led.o LiquidCrystal.o syringePump.o util.o
 
-all : syringe syringe_cfi clean 
+all : syringe syringe_cfi vcall vcall_cfi clean 
+
+vcall.o: vcall.cpp
+	$(CXX) -c vcall.cpp
 
 led.o: lib/led.h
 
@@ -27,11 +33,17 @@ util.o: lib/util.h
 
 syringe: $(OBJ)
 	@echo Compiling $@
-	$(CC) -o syringe $(OBJ)
+	$(CC) $(CFIFLAGS) -o syringe $(OBJ)
 
 syringe_cfi: $(OBJ)
 	@echo Compiling $@
-	$(CC) $(CFIFLAGS) -o syringe_cfi $(OBJ)
+	$(CC) -fsanitize=cfi $(CFIFLAGS) -o syringe_cfi $(OBJ)
+
+vcall_cfi: vcall.o
+	$(CXX) $(CXXFALGS) -fsanitize=cfi -o vcall_cfi vcall.o
+
+vcall: vcall.o
+	$(CXX) $(CXXFALGS) -o vcall vcall.o
 
 .PHONY : clean
 
