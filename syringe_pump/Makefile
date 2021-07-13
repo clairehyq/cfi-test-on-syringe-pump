@@ -18,32 +18,42 @@ CXXFALGS = -Weverything -Werror -pedantic -Wno-c++98-compat -Wno-weak-vtables \
 	-std=c++11 -O0 -fvisibility=hidden -flto -fno-sanitize-trap=all 
 OBJ = led.o LiquidCrystal.o syringePump.o util.o
 
-all : syringe syringe_cfi vcall vcall_cfi clean 
+# all : syringe syringe_cfi vcall vcall_cfi functionPointer clean 
+all: functionPointer functionPointer_cfi clean
 
-vcall.o: vcall.cpp
-	$(CXX) -c vcall.cpp
+functionPointer.o:functionPointer.c
+	$(CC) -c functionPointer.c
 
-led.o: lib/led.h
+# vcall.o: vcall.cpp
+# 	$(CXX) -c vcall.cpp
 
-LiquidCrystal.o: lib/LiquidCrystal.h
+# led.o: lib/led.h
 
-syringePump.o: lib/LiquidCrystal.h lib/util.h lib/led.h
+# LiquidCrystal.o: lib/LiquidCrystal.h
 
-util.o: lib/util.h
+# syringePump.o: lib/LiquidCrystal.h lib/util.h lib/led.h
 
-syringe: $(OBJ)
-	@echo Compiling $@
-	$(CC) $(CFIFLAGS) -o syringe $(OBJ)
+# util.o: lib/util.h
 
-syringe_cfi: $(OBJ)
-	@echo Compiling $@
-	$(CC) -fsanitize=cfi $(CFIFLAGS) -o syringe_cfi $(OBJ)
+# syringe: $(OBJ)
+# 	@echo Compiling $@
+# 	$(CC) $(CFIFLAGS) -o syringe $(OBJ)
 
-vcall_cfi: vcall.o
-	$(CXX) $(CXXFALGS) -fsanitize=cfi -o vcall_cfi vcall.o
+# syringe_cfi: $(OBJ)
+# 	@echo Compiling $@
+# 	$(CC) -fsanitize=cfi $(CFIFLAGS) -o syringe_cfi $(OBJ)
 
-vcall: vcall.o
-	$(CXX) $(CXXFALGS) -o vcall vcall.o
+# vcall_cfi: vcall.o
+# 	$(CXX) $(CXXFALGS) -fsanitize=cfi-vcall -o vcall_cfi vcall.o
+
+# vcall: vcall.o
+# 	$(CXX) $(CXXFALGS) -o vcall vcall.o
+
+functionPointer: functionPointer.o
+	$(CC) $(CFIFLAGS) -o functionPointer functionPointer.o
+
+functionPointer_cfi: functionPointer.o
+	$(CC) $(CFIFLAGS) -fsanitize=cfi -o functionPointer functionPointer.o
 
 .PHONY : clean
 
